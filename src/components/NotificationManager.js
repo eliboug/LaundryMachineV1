@@ -11,24 +11,40 @@ const NotificationManager = () => {
   useEffect(() => {
     const requestNotificationPermission = async () => {
       try {
+        // Check if browser supports notifications
+        if (!('Notification' in window)) {
+          console.warn('This browser does not support desktop notifications');
+          return;
+        }
+        
         // Request permission for notifications
         const permission = await Notification.requestPermission();
         
         if (permission === 'granted') {
           setPermissionGranted(true);
           
-          // Get the token for this device
-          const token = await getToken(messaging, {
-            vapidKey: 'YOUR_VAPID_KEY_HERE' // Replace with your VAPID key
-          });
-          
-          // Save the token to the database
-          // This token will be used to send notifications to this device
-          console.log('Notification token:', token);
-          
-          // Here you would store the token in Firebase under the user's account
-          // This is just a stub - you'll need to implement user authentication
-          // to associate tokens with specific users
+          // Check if FCM is supported
+          if (messaging) {
+            try {
+              // Get the token for this device
+              const token = await getToken(messaging, {
+                vapidKey: 'YOUR_VAPID_KEY_HERE' // Replace with your VAPID key
+              });
+              
+              // Save the token to the database
+              // This token will be used to send notifications to this device
+              console.log('Notification token:', token);
+              
+              // Here you would store the token in Firebase under the user's account
+              // This is just a stub - you'll need to implement user authentication
+              // to associate tokens with specific users
+            } catch (fcmError) {
+              console.warn('Failed to get FCM token:', fcmError);
+              // We can still use regular browser notifications
+            }
+          } else {
+            console.log('Firebase Cloud Messaging not supported in this browser. Using regular browser notifications only.');
+          }
         }
       } catch (error) {
         console.error('Error requesting notification permission:', error);
@@ -66,7 +82,7 @@ const NotificationManager = () => {
           setNotifications(prev => [...prev, newNotification]);
           
           // Display browser notification
-          if (permissionGranted) {
+          if (permissionGranted && 'Notification' in window) {
             new Notification(newNotification.title, {
               body: newNotification.message
             });
@@ -77,28 +93,38 @@ const NotificationManager = () => {
       });
     });
     
-    // Listen for messages from Firebase Cloud Messaging
-    const messageUnsubscribe = onMessage(messaging, (payload) => {
-      console.log('Message received:', payload);
-      
-      // Create notification from payload
-      const newNotification = {
-        id: Date.now().toString(),
-        title: payload.notification.title,
-        message: payload.notification.body,
-        timestamp: new Date().toISOString(),
-        read: false
-      };
-      
-      setNotifications(prev => [...prev, newNotification]);
-      
-      // Display browser notification
-      if (permissionGranted) {
-        new Notification(newNotification.title, {
-          body: newNotification.message
+    // Set up a function to clean up listeners
+    let messageUnsubscribe = () => {}; // Default no-op function
+    
+    // Listen for messages from Firebase Cloud Messaging only if available
+    if (messaging) {
+      try {
+        messageUnsubscribe = onMessage(messaging, (payload) => {
+          console.log('Message received:', payload);
+          
+          // Create notification from payload
+          const newNotification = {
+            id: Date.now().toString(),
+            title: payload.notification.title,
+            message: payload.notification.body,
+            timestamp: new Date().toISOString(),
+            read: false
+          };
+          
+          setNotifications(prev => [...prev, newNotification]);
+          
+          // Display browser notification
+          if (permissionGranted && 'Notification' in window) {
+            new Notification(newNotification.title, {
+              body: newNotification.message
+            });
+          }
         });
+      } catch (error) {
+        console.warn('Failed to set up Firebase Cloud Messaging listener:', error);
+        // Continue without FCM
       }
-    });
+    }
     
     return () => {
       unsubscribe();

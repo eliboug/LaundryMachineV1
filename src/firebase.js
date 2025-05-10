@@ -7,21 +7,29 @@ import { getMessaging } from 'firebase/messaging';
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  // TODO: Replace with your actual Firebase config
-  apiKey: "YOUR_API_KEY",
-  authDomain: "your-project-id.firebaseapp.com",
-  databaseURL: "https://your-project-id-default-rtdb.firebaseio.com",
-  projectId: "your-project-id",
-  storageBucket: "your-project-id.appspot.com",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID",
-  measurementId: "YOUR_MEASUREMENT_ID"
+  apiKey: "AIzaSyDgOt3nvCaOJYX-4RBOeiLPnweih3R9_Os",
+  authDomain: "thacherlaundry.firebaseapp.com",
+  databaseURL: "https://thacherlaundry-default-rtdb.firebaseio.com",
+  projectId: "thacherlaundry",
+  storageBucket: "thacherlaundry.firebasestorage.app",
+  messagingSenderId: "589795146697",
+  appId: "1:589795146697:web:01d304994f522286304618",
+  measurementId: "G-LQZQC2QGNP"
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 const auth = getAuth(app);
-const messaging = getMessaging(app);
+
+// Check if the current browser supports Firebase Cloud Messaging
+let messaging = null;
+if (typeof window !== 'undefined' && 'serviceWorker' in navigator && 'PushManager' in window) {
+  try {
+    messaging = getMessaging(app);
+  } catch (error) {
+    console.warn('Firebase messaging is not supported in this browser:', error);
+  }
+}
 
 export { app, database, auth, messaging };
