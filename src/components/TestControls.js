@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { getDatabase, ref, update, onValue, set } from 'firebase/database';
+import { getDatabase, ref, update, onValue, set, remove } from 'firebase/database';
 import { database } from '../firebase';
 
 const TestControls = ({ user }) => {
   const [machines, setMachines] = useState([]);
   const [machineId, setMachineId] = useState('');
   const [status, setStatus] = useState('available');
+  const [newMachineName, setNewMachineName] = useState('');
+  const [machineType, setMachineType] = useState('washer');
+  const [machineLocation, setMachineLocation] = useState('Test Location');
 
   // Load machines from Firebase
   useEffect(() => {
@@ -70,6 +73,39 @@ const TestControls = ({ user }) => {
       .catch(error => alert(`Error: ${error.message}`));
   };
 
+  // Remove a machine from Firebase
+  const removeMachine = () => {
+    // Check for authentication
+    if (!user) {
+      alert('You must be signed in to remove machines');
+      return;
+    }
+    
+    if (!machineId) {
+      alert('Please select a machine to remove');
+      return;
+    }
+    
+    // Confirm before deletion
+    if (!window.confirm(`Are you sure you want to remove this machine? This action cannot be undone.`)) {
+      return;
+    }
+    
+    // Create reference to the specific machine
+    const machineRef = ref(database, `machines/${machineId}`);
+    
+    // Remove from Firebase
+    remove(machineRef)
+      .then(() => {
+        alert('Machine removed successfully');
+        setMachineId(''); // Reset selection
+      })
+      .catch(error => {
+        console.error('Error removing machine:', error);
+        alert(`Error: ${error.message}`);
+      });
+  };
+  
   // Create a new machine in Firebase
   const createNewMachine = () => {
     console.log('Create machine button clicked');
@@ -77,6 +113,13 @@ const TestControls = ({ user }) => {
     // Check for authentication
     if (!user) {
       alert('You must be signed in to create machines');
+      return;
+    }
+    
+    // Validate machine name
+    const machineName = newMachineName.trim();
+    if (!machineName) {
+      alert('Please enter a name for the machine');
       return;
     }
     
@@ -92,9 +135,9 @@ const TestControls = ({ user }) => {
       // Create a machine object with user information
       const machineData = {
         id: newId,
-        name: `Machine ${timestamp.toString().slice(-4)}`,
-        location: "Test Location",
-        type: Math.random() > 0.5 ? "washer" : "dryer",
+        name: machineName,
+        location: machineLocation,
+        type: machineType,
         status: "available",
         notified: false,
         createdAt: timestamp,
@@ -134,6 +177,38 @@ const TestControls = ({ user }) => {
       
       <div className="control-section">
         <h4>Create New Test Machine</h4>
+        
+        <div className="form-group">
+          <label>Machine Name:</label>
+          <input 
+            type="text" 
+            value={newMachineName} 
+            onChange={(e) => setNewMachineName(e.target.value)}
+            placeholder="Enter machine name"
+          />
+        </div>
+        
+        <div className="form-group">
+          <label>Machine Type:</label>
+          <select
+            value={machineType}
+            onChange={(e) => setMachineType(e.target.value)}
+          >
+            <option value="washer">Washer</option>
+            <option value="dryer">Dryer</option>
+          </select>
+        </div>
+        
+        <div className="form-group">
+          <label>Location:</label>
+          <input 
+            type="text" 
+            value={machineLocation} 
+            onChange={(e) => setMachineLocation(e.target.value)}
+            placeholder="Enter location"
+          />
+        </div>
+        
         <button onClick={createNewMachine}>
           Create New Machine
         </button>
@@ -177,6 +252,10 @@ const TestControls = ({ user }) => {
             <button onClick={updateMachineStatus}>
               Update Status
             </button>
+            
+            <button onClick={removeMachine} style={{ backgroundColor: '#dc3545', marginTop: '10px' }}>
+              Remove Machine
+            </button>
           </>
         )}
       </div>
@@ -191,6 +270,15 @@ const TestControls = ({ user }) => {
               <li key={machine.id}>
                 <strong>{machine.name}</strong> ({machine.type}) - 
                 Status: <span className={`status-${machine.status}`}>{machine.status}</span>
+                <button 
+                  className="remove-btn" 
+                  onClick={() => {
+                    setMachineId(machine.id);
+                    removeMachine();
+                  }}
+                >
+                  ×
+                </button>
               </li>
             ))}
           </ul>
@@ -272,6 +360,28 @@ const TestControls = ({ user }) => {
         
         .status-offline {
           color: #6c757d;
+        }
+        
+        .remove-btn {
+          background-color: #dc3545;
+          color: white;
+          border: none;
+          border-radius: 50%;
+          width: 24px;
+          height: 24px;
+          font-size: 16px;
+          line-height: 1;
+          padding: 0;
+          margin-left: 10px;
+          cursor: pointer;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          float: right;
+        }
+        
+        .remove-btn:hover {
+          background-color: #c82333;
         }
       `}</style>
     </div>
