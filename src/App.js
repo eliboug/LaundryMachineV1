@@ -11,6 +11,16 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 function AppContent() {
   const { currentUser } = useAuth();
 
+  // If user is not logged in, only show the Auth component in full screen
+  if (!currentUser) {
+    return (
+      <div className="App full-page-auth">
+        <Auth />
+      </div>
+    );
+  }
+
+  // Otherwise show the full application with header and footer
   return (
     <div className="App">
       <header className="App-header">
@@ -20,18 +30,9 @@ function AppContent() {
 
       <main className="App-main">
         <Auth />
-        
-        {currentUser ? (
-          <>
-            <MachineStatusDashboard user={currentUser} />
-            <NotificationManager user={currentUser} />
-            <TestControls user={currentUser} />
-          </>
-        ) : (
-          <div className="no-auth-message">
-            <p>Please log in to access LaundryOnline features</p>
-          </div>
-        )}
+        <MachineStatusDashboard user={currentUser} />
+        <NotificationManager user={currentUser} />
+        <TestControls user={currentUser} />
       </main>
 
       <footer className="App-footer">
