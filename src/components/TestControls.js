@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { getDatabase, ref, update, onValue, set, remove } from 'firebase/database';
 import { database } from '../firebase';
 
+// Define admin user ID - replace this with your actual admin user ID
+const ADMIN_USER_ID = "oXFmOG1pE2ZV7RuiBUqdKe5c2TC2"; // Replace with your actual admin user ID
+
 const TestControls = ({ user }) => {
   const [machines, setMachines] = useState([]);
   const [machineId, setMachineId] = useState('');
@@ -123,6 +126,15 @@ const TestControls = ({ user }) => {
       return;
     }
     
+    // Check for duplicate machine names
+    const duplicateMachine = machines.find(machine => 
+      machine.name.toLowerCase() === machineName.toLowerCase());
+    
+    if (duplicateMachine) {
+      alert(`A machine with the name "${machineName}" already exists. Please use a different name.`);
+      return;
+    }
+    
     try {
       // Get a direct reference to make sure we're using the right database
       const db = getDatabase();
@@ -171,6 +183,14 @@ const TestControls = ({ user }) => {
     }
   };
 
+  // Check if current user has admin access
+  const isAdmin = user && (user.uid === ADMIN_USER_ID);
+
+  // If user is not logged in or is not the admin, don't render anything
+  if (!user || !isAdmin) {
+    return null; // Return nothing, completely hiding the component
+  }
+  
   return (
     <div className="test-controls">
       <h3>Test Controls</h3>
