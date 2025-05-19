@@ -12,8 +12,15 @@ const Signup = ({ onLoginClick }) => {
   async function handleSubmit(e) {
     e.preventDefault();
     
+    // Check if passwords match
     if (passwordRef.current.value !== passwordConfirmRef.current.value) {
       return setError('Passwords do not match');
+    }
+    
+    // Check if email is from thacher.org domain
+    const email = emailRef.current.value;
+    if (!email.endsWith('@thacher.org')) {
+      return setError('Only @thacher.org email addresses are allowed to register');
     }
     
     try {
@@ -22,7 +29,7 @@ const Signup = ({ onLoginClick }) => {
       setLoading(true);
       
       await signup(
-        emailRef.current.value, 
+        email, 
         passwordRef.current.value
       );
       
