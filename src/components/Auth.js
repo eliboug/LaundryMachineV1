@@ -22,14 +22,12 @@ const Auth = () => {
     setLogoutLoading(false);
   }
 
-  const { currentUser: user } = useAuth(); // Aliasing for clarity
-
   return (
-    <div className={`auth-container ${!user ? 'full-screen-auth' : ''}`}>
-      {user ? (
+    <div className={`auth-container ${!currentUser ? 'full-screen-auth' : ''}`}>
+      {currentUser ? (
         <div className="user-profile">
           <h3>Profile</h3>
-          <p><strong>Email:</strong> {user.email}</p>
+          <p><strong>Email:</strong> {currentUser.email}</p>
           {error && <div className="alert alert-danger">{error}</div>}
           <button 
             onClick={handleLogout} 
