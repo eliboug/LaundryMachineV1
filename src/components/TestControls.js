@@ -8,7 +8,7 @@ const ADMIN_USER_ID = "oXFmOG1pE2ZV7RuiBUqdKe5c2TC2"; // Replace with your actua
 const TestControls = ({ user }) => {
   const [machines, setMachines] = useState([]);
   const [machineId, setMachineId] = useState('');
-  const [status, setStatus] = useState('available');
+  const [status, setStatus] = useState('inactive');
   const [newMachineName, setNewMachineName] = useState('');
   const [machineType, setMachineType] = useState('washer');
   const [machineLocation, setMachineLocation] = useState('Test Location');
@@ -58,16 +58,9 @@ const TestControls = ({ user }) => {
       lastUpdatedAt: Date.now()
     };
     
-    // If changing to 'running', set start time and ensure notified is false
-    if (status === 'running') {
+    // If changing to 'active', set start time
+    if (status === 'active') {
       updates.startTime = Date.now();
-      updates.estimatedDuration = 45;  // 45 minutes default
-      updates.notified = false;
-    }
-    
-    // If changing to 'complete', make sure notified is false to trigger notification
-    if (status === 'complete') {
-      updates.notified = false;
     }
     
     // Update Firebase
@@ -150,7 +143,7 @@ const TestControls = ({ user }) => {
         name: machineName,
         location: machineLocation,
         type: machineType,
-        status: "available",
+        status: "inactive",
         notified: false,
         createdAt: timestamp,
         createdBy: user.uid,
@@ -262,10 +255,8 @@ const TestControls = ({ user }) => {
                 value={status} 
                 onChange={(e) => setStatus(e.target.value)}
               >
-                <option value="available">Available</option>
-                <option value="running">Running</option>
-                <option value="complete">Complete</option>
-                <option value="offline">Offline</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
               </select>
             </div>
             
@@ -365,20 +356,12 @@ const TestControls = ({ user }) => {
           border-bottom: 1px solid #f0f0f0;
         }
         
-        .status-available {
-          color: #28a745;
-        }
-        
-        .status-running {
+        .status-active {
           color: #007bff;
-        }
-        
-        .status-complete {
-          color: #ffc107;
           font-weight: bold;
         }
         
-        .status-offline {
+        .status-inactive {
           color: #6c757d;
         }
         

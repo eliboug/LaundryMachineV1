@@ -30,23 +30,24 @@ const MachineStatusDashboard = () => {
     return () => unsubscribe();
   }, []);
 
-  // Calculate time remaining for a machine
-  const calculateTimeRemaining = (startTime, duration) => {
-    if (!startTime || !duration) return 'Unknown';
+  // Calculate how long the machine has been active
+  const calculateActiveTime = (startTime) => {
+    if (!startTime) return 'Recently activated';
     
     const start = new Date(startTime).getTime();
     const now = new Date().getTime();
     const elapsedMs = now - start;
-    const durationMs = duration * 60 * 1000; // Convert minutes to milliseconds
     
-    if (elapsedMs >= durationMs) {
-      return 'Cycle complete';
+    // Convert to minutes
+    const elapsedMinutes = Math.floor(elapsedMs / (60 * 1000));
+    
+    if (elapsedMinutes < 60) {
+      return `Active for ${elapsedMinutes} minutes`;
+    } else {
+      const hours = Math.floor(elapsedMinutes / 60);
+      const minutes = elapsedMinutes % 60;
+      return `Active for ${hours}h ${minutes}m`;
     }
-    
-    const remainingMs = durationMs - elapsedMs;
-    const remainingMinutes = Math.ceil(remainingMs / (60 * 1000));
-    
-    return `${remainingMinutes} min remaining`;
   };
 
   if (loading) {
@@ -70,9 +71,9 @@ const MachineStatusDashboard = () => {
               <p>Location: {machine.location}</p>
               <p>Type: {machine.type}</p>
               <p>Status: {machine.status}</p>
-              {machine.status === 'running' && (
+              {machine.status === 'active' && (
                 <p>
-                  {calculateTimeRemaining(machine.startTime, machine.estimatedDuration)}
+                  {calculateActiveTime(machine.startTime)}
                 </p>
               )}
             </div>
