@@ -142,33 +142,39 @@ const NotificationManager = () => {
   };
 
   return (
-    <div className="notification-center">
-      <h3>Notifications</h3>
-      
-      {notifications.length === 0 ? (
-        <p>No notifications</p>
-      ) : (
-        <ul className="notification-list">
-          {notifications.map(note => (
-            <li 
-              key={note.id} 
-              className={`notification-item ${note.read ? 'read' : 'unread'}`}
-              onClick={() => markAsRead(note.id)}
-            >
-              <h4>{note.title}</h4>
-              <p>{note.message}</p>
-              <small>{new Date(note.timestamp).toLocaleString()}</small>
-            </li>
-          ))}
-        </ul>
-      )}
+    <div className="notifications-container">
+      <h1 className="page-title">Notifications</h1>
       
       {!permissionGranted && (
         <div className="permission-request">
           <p>Enable notifications to get alerts when your laundry is done.</p>
-          <button onClick={() => Notification.requestPermission()}>
+          <button className="enable-notifications-btn" onClick={() => Notification.requestPermission()}>
             Enable Notifications
           </button>
+        </div>
+      )}
+      
+      {notifications.length === 0 ? (
+        <div className="empty-notifications">
+          <p>You don't have any notifications yet</p>
+          <span>When your laundry is done, you'll receive a notification here</span>
+        </div>
+      ) : (
+        <div className="notification-list">
+          {notifications.map(note => (
+            <div 
+              key={note.id} 
+              className={`notification-item ${note.read ? 'read' : 'unread'}`}
+              onClick={() => markAsRead(note.id)}
+            >
+              <div className="notification-content">
+                <h4>{note.title}</h4>
+                <p>{note.message}</p>
+                <span className="notification-time">{new Date(note.timestamp).toLocaleString()}</span>
+              </div>
+              {!note.read && <div className="unread-indicator"></div>}
+            </div>
+          ))}
         </div>
       )}
     </div>

@@ -3,6 +3,7 @@ import { initializeApp } from 'firebase/app';
 import { getDatabase } from 'firebase/database';
 import { getAuth } from 'firebase/auth';
 import { getMessaging } from 'firebase/messaging';
+import { getStorage } from 'firebase/storage';
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
@@ -21,6 +22,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 const auth = getAuth(app);
+const storage = getStorage(app);
 
 // Check if the current browser supports Firebase Cloud Messaging
 let messaging = null;
@@ -32,4 +34,4 @@ if (typeof window !== 'undefined' && 'serviceWorker' in navigator && 'PushManage
   }
 }
 
-export { app, database, auth, messaging };
+export { app, database, auth, messaging, storage };

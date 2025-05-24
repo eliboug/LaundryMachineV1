@@ -1,43 +1,59 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './App.css';
 import MachineStatusDashboard from './components/MachineStatusDashboard';
 import NotificationManager from './components/NotificationManager';
+import Settings from './components/Settings';
 import TestControls from './components/TestControls';
 import Auth from './components/Auth';
+import Header from './components/Header';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-
 
 // App content component that uses the auth context
 function AppContent() {
-  const { currentUser } = useAuth();
+  const { currentUser, isAdmin } = useAuth();
+  const [activeTab, setActiveTab] = useState('machines');
 
   // If user is not logged in, only show the Auth component in full screen
   if (!currentUser) {
     return (
-      <div className="App full-page-auth">
+      <div className="app full-page-auth">
         <Auth />
       </div>
     );
   }
 
-  // Otherwise show the full application with header and footer
+  // Function to render the active tab content
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'machines':
+        return <MachineStatusDashboard user={currentUser} />;
+      case 'notifications':
+        return <NotificationManager user={currentUser} />;
+      case 'settings':
+        return <Settings />;
+      default:
+        return <MachineStatusDashboard user={currentUser} />;
+    }
+  };
+
+  // Otherwise show the full application with header and tab-based content
   return (
-    <div className="App">
-      <header className="App-header">
-        <h1>LaundryOnline</h1>
-        <p>Never miss when your laundry is done!</p>
-      </header>
-
-      <main className="App-main">
-        <Auth />
-        <MachineStatusDashboard user={currentUser} />
-        <NotificationManager user={currentUser} />
-        <TestControls user={currentUser} />
+    <div className="app">
+      <Header activeTab={activeTab} setActiveTab={setActiveTab} />
+      
+      <main className="app-main">
+        {renderTabContent()}
       </main>
-
-      <footer className="App-footer">
-        <p>&copy; {new Date().getFullYear()} LaundryOnline</p>
-      </footer>
+      
+      {/* Only show TestControls in a development panel for admin users */}
+      {isAdmin && (
+        <div className="dev-controls">
+          <details>
+            <summary>Development Controls</summary>
+            <TestControls user={currentUser} />
+          </details>
+        </div>
+      )}
     </div>
   );
 }

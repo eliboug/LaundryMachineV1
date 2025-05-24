@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { database } from '../firebase';
-import { ref, onValue } from 'firebase/database';
+import { ref, onValue, update } from 'firebase/database';
+import MachineCard from './MachineCard';
 
 const MachineStatusDashboard = () => {
   const [machines, setMachines] = useState([]);
@@ -30,55 +31,68 @@ const MachineStatusDashboard = () => {
     return () => unsubscribe();
   }, []);
 
-  // Calculate how long the machine has been active
-  const calculateActiveTime = (startTime) => {
-    if (!startTime) return 'Recently activated';
-    
-    const start = new Date(startTime).getTime();
-    const now = new Date().getTime();
-    const elapsedMs = now - start;
-    
-    // Convert to minutes
-    const elapsedMinutes = Math.floor(elapsedMs / (60 * 1000));
-    
-    if (elapsedMinutes < 60) {
-      return `Active for ${elapsedMinutes} minutes`;
-    } else {
-      const hours = Math.floor(elapsedMinutes / 60);
-      const minutes = elapsedMinutes % 60;
-      return `Active for ${hours}h ${minutes}m`;
-    }
+  // Function to handle notification requests
+  const handleNotify = (machineId) => {
+    // Here you would implement your notification logic
+    console.log(`Notification requested for machine ${machineId}`);
+    // This could be where you set up notifications when the machine cycle is complete
   };
 
+  // Filter machines by status
+  const availableMachines = machines.filter(machine => 
+    machine.status === 'inactive' || machine.status === 'available'
+  );
+  
+  const inUseMachines = machines.filter(machine => 
+    machine.status === 'active' || machine.status === 'in-use'
+  );
+
   if (loading) {
-    return <div>Loading machine status...</div>;
+    return <div className="loading">Loading machine status...</div>;
   }
 
   return (
-    <div className="machine-dashboard">
-      <h2>Laundry Machine Status</h2>
+    <div className="machines-container">
+      <h1 className="page-title">Machines</h1>
       
       {machines.length === 0 ? (
-        <p>No machines found. Please check your connection.</p>
+        <p className="no-machines">No machines found. Please check your connection.</p>
       ) : (
-        <div className="machine-grid">
-          {machines.map(machine => (
-            <div 
-              key={machine.id} 
-              className={`machine-card ${machine.status}`}
-            >
-              <h3>{machine.name}</h3>
-              <p>Location: {machine.location}</p>
-              <p>Type: {machine.type}</p>
-              <p>Status: {machine.status}</p>
-              {machine.status === 'active' && (
-                <p>
-                  {calculateActiveTime(machine.startTime)}
-                </p>
-              )}
-            </div>
-          ))}
-        </div>
+        <>
+          <div className="machine-section">
+            <h2 className="section-title">Available</h2>
+            {availableMachines.length === 0 ? (
+              <p className="no-machines-message">No available machines at the moment.</p>
+            ) : (
+              <div className="machine-list">
+                {availableMachines.map(machine => (
+                  <MachineCard 
+                    key={machine.id} 
+                    machine={machine}
+                    onNotify={handleNotify}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+          
+          <div className="machine-section">
+            <h2 className="section-title">In Use</h2>
+            {inUseMachines.length === 0 ? (
+              <p className="no-machines-message">No machines currently in use.</p>
+            ) : (
+              <div className="machine-list">
+                {inUseMachines.map(machine => (
+                  <MachineCard 
+                    key={machine.id} 
+                    machine={machine}
+                    onNotify={handleNotify}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        </>
       )}
     </div>
   );
