@@ -1,19 +1,66 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import defaultAvatar from '../assets/default-avatar.png';
+import { database } from '../firebase';
+import { ref, get, set } from 'firebase/database';
 
 const Settings = () => {
   const { currentUser, logout, updateProfilePicture } = useAuth();
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
   const [uploadSuccess, setUploadSuccess] = useState(false);
+  const [emailNotificationsEnabled, setEmailNotificationsEnabled] = useState(true);
+  const [saveStatus, setSaveStatus] = useState('');
   const fileInputRef = useRef(null);
+  
+  // Load user preferences from Firebase
+  useEffect(() => {
+    const loadUserPreferences = async () => {
+      if (!currentUser) return;
+      
+      try {
+        const userPrefsRef = ref(database, `users/${currentUser.uid}/preferences`);
+        const snapshot = await get(userPrefsRef);
+        
+        if (snapshot.exists()) {
+          const prefs = snapshot.val();
+          if (prefs.emailNotifications !== undefined) {
+            setEmailNotificationsEnabled(prefs.emailNotifications);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading user preferences:', error);
+      }
+    };
+    
+    loadUserPreferences();
+  }, [currentUser]);
 
   const handleLogout = async () => {
     try {
       await logout();
     } catch (error) {
       console.error('Failed to log out', error);
+    }
+  };
+  
+  // Toggle email notifications preference
+  const toggleEmailNotifications = async () => {
+    if (!currentUser) return;
+    
+    try {
+      const newValue = !emailNotificationsEnabled;
+      setEmailNotificationsEnabled(newValue);
+      
+      // Update user preferences in Firebase
+      const userPrefsRef = ref(database, `users/${currentUser.uid}/preferences/emailNotifications`);
+      await set(userPrefsRef, newValue);
+      
+      setSaveStatus('Preferences saved');
+      setTimeout(() => setSaveStatus(''), 3000);
+    } catch (error) {
+      console.error('Error updating email preferences:', error);
+      setSaveStatus('Error saving preferences');
     }
   };
   
@@ -99,6 +146,25 @@ const Settings = () => {
                 <span>Receive notifications when your laundry is done</span>
               </div>
             </div>
+          </div>
+          
+          <div className="settings-group">
+            <h3>Notification Settings</h3>
+            <div className="setting-item">
+              <label className="toggle-switch">
+                <input 
+                  type="checkbox" 
+                  checked={emailNotificationsEnabled}
+                  onChange={toggleEmailNotifications} 
+                />
+                <span className="toggle-slider"></span>
+              </label>
+              <div className="setting-label">
+                <p>Email Notifications</p>
+                <span>Receive email alerts when your laundry is done</span>
+              </div>
+            </div>
+            {saveStatus && <div className="save-status">{saveStatus}</div>}
           </div>
           
           <div className="settings-group">

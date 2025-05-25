@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getDatabase, ref, update, onValue, set, remove } from 'firebase/database';
 import { database } from '../firebase';
+import { getFunctions, httpsCallable } from 'firebase/functions';
 
 // Define admin user ID - replace this with your actual admin user ID
 const ADMIN_USER_ID = "oXFmOG1pE2ZV7RuiBUqdKe5c2TC2"; // Replace with your actual admin user ID
@@ -295,6 +296,11 @@ const TestControls = ({ user }) => {
           </ul>
         )}
       </div>
+
+      <div className="control-section">
+        <h4>Email Notification Testing</h4>
+        <EmailTestPanel user={user} />
+      </div>
       
       <style jsx="true">{`
         .test-controls {
@@ -385,6 +391,127 @@ const TestControls = ({ user }) => {
         
         .remove-btn:hover {
           background-color: #c82333;
+        }
+      `}</style>
+    </div>
+  );
+};
+
+// Email Test Panel Component
+const EmailTestPanel = ({ user }) => {
+  const [testEmail, setTestEmail] = useState('');
+  const [testSubject, setTestSubject] = useState('LaundryOnline Test Email');
+  const [testMessage, setTestMessage] = useState('This is a test email from LaundryOnline.');
+  const [sending, setSending] = useState(false);
+  const [sendResult, setSendResult] = useState({ success: false, message: '' });
+
+  const sendTestEmail = async () => {
+    if (!testEmail || !testEmail.includes('@')) {
+      alert('Please enter a valid email address.');
+      return;
+    }
+
+    setSending(true);
+    setSendResult({ success: false, message: '' });
+
+    try {
+      const functions = getFunctions();
+      const sendTestEmailFunction = httpsCallable(functions, 'sendTestEmail');
+      
+      const result = await sendTestEmailFunction({
+        email: testEmail,
+        subject: testSubject,
+        message: testMessage
+      });
+
+      setSendResult({
+        success: true,
+        message: `Success! Email sent to ${testEmail}`
+      });
+    } catch (error) {
+      console.error('Error sending test email:', error);
+      setSendResult({
+        success: false,
+        message: `Error: ${error.message}`
+      });
+    } finally {
+      setSending(false);
+    }
+  };
+
+  return (
+    <div className="email-test-panel">
+      <div className="form-group">
+        <label>Recipient Email:</label>
+        <input
+          type="email"
+          value={testEmail}
+          onChange={(e) => setTestEmail(e.target.value)}
+          placeholder="Enter email address"
+          disabled={sending}
+        />
+      </div>
+
+      <div className="form-group">
+        <label>Subject:</label>
+        <input
+          type="text"
+          value={testSubject}
+          onChange={(e) => setTestSubject(e.target.value)}
+          placeholder="Email subject"
+          disabled={sending}
+        />
+      </div>
+
+      <div className="form-group">
+        <label>Message:</label>
+        <textarea
+          value={testMessage}
+          onChange={(e) => setTestMessage(e.target.value)}
+          placeholder="Email message"
+          rows="4"
+          disabled={sending}
+          style={{ width: '100%', maxWidth: '300px', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ced4da' }}
+        />
+      </div>
+
+      <button
+        onClick={sendTestEmail}
+        disabled={sending || !testEmail}
+        style={{
+          backgroundColor: sending ? '#6c757d' : '#28a745',
+          opacity: sending || !testEmail ? 0.7 : 1
+        }}
+      >
+        {sending ? 'Sending...' : 'Send Test Email'}
+      </button>
+
+      {sendResult.message && (
+        <div className={`email-result ${sendResult.success ? 'success' : 'error'}`}>
+          {sendResult.message}
+        </div>
+      )}
+
+      <style jsx="true">{`
+        .email-test-panel {
+          margin-top: 1rem;
+        }
+        
+        .email-result {
+          margin-top: 1rem;
+          padding: 0.75rem;
+          border-radius: 4px;
+          font-weight: 500;
+        }
+        
+        .email-result.success {
+          background-color: #d4edda;
+          color: #155724;
+        }
+        
+        .email-result.error {
+          background-color: #f8d7da;
+          color: #721c24;
         }
       `}</style>
     </div>

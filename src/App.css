@@ -173,11 +173,60 @@ body {
   padding: 0.5rem 1rem;
   font-size: 0.9rem;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.2s ease;
+  min-width: 100px;
 }
 
 .notify-btn:hover {
   background-color: #e0e0e0;
+}
+
+.notify-btn.subscribed {
+  background-color: #e0f2fe;
+  color: #0284c7;
+}
+
+.notify-btn.subscribed:hover {
+  background-color: #bae6fd;
+}
+
+.notify-btn.processing {
+  background-color: #f3f4f6;
+  color: #9ca3af;
+  cursor: wait;
+}
+
+.notify-btn.subscribed {
+  background-color: #dcfce7;
+  color: #16a34a;
+}
+
+.notify-btn.unsubscribed {
+  background-color: #f3f4f6;
+  color: #6b7280;
+}
+
+.notify-btn.error {
+  background-color: #fee2e2;
+  color: #ef4444;
+}
+
+.status-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  margin-top: 0.5rem;
+}
+
+.status-badge.active {
+  background-color: #fee2e2;
+  color: #ef4444;
+}
+
+.status-badge.available {
+  background-color: #dcfce7;
+  color: #16a34a;
 }
 
 /* Notification Styles */
@@ -433,6 +482,16 @@ input:checked + .toggle-slider:before {
 .setting-label span {
   font-size: 0.9rem;
   color: #6b7280;
+}
+
+.save-status {
+  margin-top: 0.75rem;
+  padding: 0.5rem;
+  background-color: #f0fdf4;
+  border-radius: 4px;
+  color: #10b981;
+  font-size: 0.9rem;
+  transition: opacity 0.3s ease;
 }
 
 .logout-button {

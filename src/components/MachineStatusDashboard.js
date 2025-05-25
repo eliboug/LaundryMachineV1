@@ -31,12 +31,7 @@ const MachineStatusDashboard = () => {
     return () => unsubscribe();
   }, []);
 
-  // Function to handle notification requests
-  const handleNotify = (machineId) => {
-    // Here you would implement your notification logic
-    console.log(`Notification requested for machine ${machineId}`);
-    // This could be where you set up notifications when the machine cycle is complete
-  };
+  // The notification functionality is now handled directly in the MachineCard component
 
   // Filter machines by status
   const availableMachines = machines.filter(machine => 
@@ -60,23 +55,6 @@ const MachineStatusDashboard = () => {
       ) : (
         <>
           <div className="machine-section">
-            <h2 className="section-title">Available</h2>
-            {availableMachines.length === 0 ? (
-              <p className="no-machines-message">No available machines at the moment.</p>
-            ) : (
-              <div className="machine-list">
-                {availableMachines.map(machine => (
-                  <MachineCard 
-                    key={machine.id} 
-                    machine={machine}
-                    onNotify={handleNotify}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-          
-          <div className="machine-section">
             <h2 className="section-title">In Use</h2>
             {inUseMachines.length === 0 ? (
               <p className="no-machines-message">No machines currently in use.</p>
@@ -86,7 +64,22 @@ const MachineStatusDashboard = () => {
                   <MachineCard 
                     key={machine.id} 
                     machine={machine}
-                    onNotify={handleNotify}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+          
+          <div className="machine-section">
+            <h2 className="section-title">Available</h2>
+            {availableMachines.length === 0 ? (
+              <p className="no-machines-message">No available machines at the moment.</p>
+            ) : (
+              <div className="machine-list">
+                {availableMachines.map(machine => (
+                  <MachineCard 
+                    key={machine.id} 
+                    machine={machine}
                   />
                 ))}
               </div>
