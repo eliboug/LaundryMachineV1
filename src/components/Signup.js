@@ -42,49 +42,72 @@ const Signup = ({ onLoginClick }) => {
   }
 
   return (
-    <div className="auth-form">
-      <h2>Sign Up</h2>
-      {error && <div className="alert alert-danger">{error}</div>}
-      {message && <div className="alert alert-success">{message}</div>}
-      
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label>Email</label>
-          <input 
-            type="email" 
-            ref={emailRef} 
-            required 
-            className="form-control" 
-          />
+    <div className="login-container">
+      <div className="login-card">
+        <div className="login-header">
+          <div className="logo-container">
+            <div className="logo">
+              <img src="/thacherlogo.png" alt="Thacher Logo" className="thacher-logo" />
+            </div>
+          </div>
+          <h1>Sign Up</h1>
+          <p className="tagline">Create your LaundryOnline account</p>
         </div>
-        
-        <div className="form-group">
-          <label>Password</label>
-          <input 
-            type="password" 
-            ref={passwordRef} 
-            required 
-            className="form-control" 
-          />
+
+        {error && <div className="alert alert-danger">{error}</div>}
+        {message && <div className="alert alert-success">{message}</div>}
+
+        <div className="form-container">
+          <form onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label>Email Address</label>
+              <div className="input-with-icon">
+                <i className="email-icon"></i>
+                <input
+                  type="email"
+                  ref={emailRef}
+                  required
+                  placeholder="yourname@thacher.org"
+                />
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label>Password</label>
+              <div className="input-with-icon">
+                <i className="password-icon"></i>
+                <input
+                  type="password"
+                  ref={passwordRef}
+                  required
+                  placeholder="Enter password"
+                />
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label>Password Confirmation</label>
+              <div className="input-with-icon">
+                <i className="password-icon"></i>
+                <input
+                  type="password"
+                  ref={passwordConfirmRef}
+                  required
+                  placeholder="Confirm password"
+                />
+              </div>
+            </div>
+
+            <button disabled={loading} type="submit" className="btn-submit">
+              {loading ? 'Creating Account...' : 'Sign Up'}
+            </button>
+          </form>
         </div>
-        
-        <div className="form-group">
-          <label>Password Confirmation</label>
-          <input 
-            type="password" 
-            ref={passwordConfirmRef} 
-            required 
-            className="form-control" 
-          />
+
+        <div className="form-footer signup-prompt">
+          <span>Already have an account?</span>{' '}
+          <button className="link-btn" type="button" onClick={onLoginClick}>Log In</button>
         </div>
-        
-        <button disabled={loading} type="submit" className="btn-primary">
-          {loading ? 'Creating Account...' : 'Sign Up'}
-        </button>
-      </form>
-      
-      <div className="auth-link">
-        Already have an account? <button onClick={onLoginClick}>Log In</button>
       </div>
     </div>
   );
